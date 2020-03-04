@@ -11,7 +11,8 @@
         android:layout_marginStart="2pt"
         android:layout_marginTop="2pt"
         android:text="Item Title"
-        android:textAppearance="?android:attr/textAppearanceListItem" />
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textColor="@color/colorPrimary"/>
 
     <TextView
         android:id="@+id/textView_rsstext"
@@ -20,5 +21,6 @@
         android:layout_below="@+id/textView_rsstitle"
         android:layout_marginLeft="4pt"
         android:text="Item text"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        android:textColor="?android:attr/textColorSecondary" />
 </RelativeLayout>
