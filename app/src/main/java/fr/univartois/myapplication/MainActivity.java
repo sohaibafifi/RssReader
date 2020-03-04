@@ -11,6 +11,8 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +28,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Loading news", Snackbar.LENGTH_LONG).show();
+
+                String[] news = {"Premier titre", "Deuxieme titre", "Troisieme titre"};
+                ListView listView = findViewById(R.id.load_list);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                        getApplicationContext(),
+                        android.R.layout.simple_list_item_1,
+                        android.R.id.text1,
+                        news);
+                listView.setAdapter(adapter);
+                Snackbar.make(view, "Loading news .. done", Snackbar.LENGTH_LONG).show();
+
             }
         });
     }
