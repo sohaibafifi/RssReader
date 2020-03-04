@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -29,9 +32,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Loading news", Snackbar.LENGTH_LONG).show();
 
-                String[] news = {"Premier titre", "Deuxieme titre", "Troisieme titre"};
+                // String[] news = {"Premier titre", "Deuxieme titre", "Troisieme titre"};
+                List<RssItem> news = new ArrayList<>();
+                news.add(new RssItem("Premier titre"));
+                news.add(new RssItem("Deuxieme titre"));
+                news.add(new RssItem("Troisieme titre"));
                 ListView listView = findViewById(R.id.load_list);
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                ArrayAdapter<RssItem> adapter = new ArrayAdapter<>(
                         getApplicationContext(),
                         android.R.layout.simple_list_item_1,
                         android.R.id.text1,
