@@ -1,5 +1,7 @@
 package fr.univartois.myapplication;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -7,13 +9,21 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
+import android.util.Xml;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,18 +42,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Loading news", Snackbar.LENGTH_LONG).show();
 
-                // String[] news = {"Premier titre", "Deuxieme titre", "Troisieme titre"};
-                List<RssItem> news = new ArrayList<>();
-                news.add(new RssItem("Premier titre"));
-                news.add(new RssItem("Deuxieme titre"));
-                news.add(new RssItem("Troisieme titre"));
-                ListView listView = findViewById(R.id.load_list);
-                ArrayAdapter<RssItem> adapter = new ArrayAdapter<>(
-                        getApplicationContext(),
-                        android.R.layout.simple_list_item_1,
-                        android.R.id.text1,
-                        news);
-                listView.setAdapter(adapter);
+                String url = "https://www.lemonde.fr/rss/une.xml";
+                Downloader downloader = new Downloader(url);
+                downloader.start();
+
                 Snackbar.make(view, "Loading news .. done", Snackbar.LENGTH_LONG).show();
 
             }
@@ -70,5 +72,83 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    class Downloader extends Thread {
+        private String url;
+
+        Downloader(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public void run() {
+            try {
+                final List<RssItem> news = new ArrayList<>();
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.INTERNET)
+                        == PackageManager.PERMISSION_GRANTED) {
+
+
+                    InputStream stream = new URL(this.url).openConnection().getInputStream();
+                    XmlPullParser parser = Xml.newPullParser();
+                    parser.setInput(stream, null);
+                    int eventType = parser.getEventType();
+                    boolean done = false;
+                    RssItem item = null;
+                    while (eventType != XmlPullParser.END_DOCUMENT && !done) {
+                        String name = null;
+                        switch (eventType) {
+                            case XmlPullParser.START_DOCUMENT:
+                                break;
+                            case XmlPullParser.START_TAG:
+                                name = parser.getName();
+                                if (name.equalsIgnoreCase("item")) {
+                                    item = new RssItem();
+                                } else if (item != null) {
+                                    if (name.equalsIgnoreCase("link")) {
+                                        item.link = parser.nextText();
+                                    } else if (name.equalsIgnoreCase("description")) {
+                                        item.description = parser.nextText().trim();
+                                    } else if (name.equalsIgnoreCase("pubDate")) {
+                                        item.pubDate = parser.nextText();
+                                    } else if (name.equalsIgnoreCase("title")) {
+                                        item.title = parser.nextText().trim();
+                                    }
+                                }
+                                break;
+                            case XmlPullParser.END_TAG:
+                                name = parser.getName();
+                                if (name.equalsIgnoreCase("item") && item != null) {
+                                    news.add(item);
+                                } else if (name.equalsIgnoreCase("channel")) {
+                                    done = true;
+                                }
+                                break;
+                        }
+                        eventType = parser.next();
+                    }
+                }
+
+
+                final ListView listView = findViewById(R.id.load_list);
+                listView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayAdapter<RssItem> adapter = new ArrayAdapter<>(
+                                getApplicationContext(),
+                                android.R.layout.simple_list_item_1,
+                                android.R.id.text1,
+                                news);
+                        listView.setAdapter(adapter);
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

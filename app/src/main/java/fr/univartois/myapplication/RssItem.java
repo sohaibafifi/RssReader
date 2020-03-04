@@ -19,6 +19,9 @@ public class RssItem {
         this.title = title;
     }
 
+    public RssItem() {
+    }
+
     @NonNull
     @Override
     public String toString() {
