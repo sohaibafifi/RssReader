@@ -1,7 +1,9 @@
 package fr.univartois.myapplication;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -15,6 +17,7 @@ import android.util.Xml;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -48,6 +51,17 @@ public class MainActivity extends AppCompatActivity {
 
                 Snackbar.make(view, "Loading news .. done", Snackbar.LENGTH_LONG).show();
 
+            }
+        });
+
+        ListView listView = findViewById(R.id.load_list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                RssItem item = (RssItem) adapterView.getItemAtPosition(position);
+                Uri uri = Uri.parse(item.link);
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
             }
         });
     }
@@ -134,10 +148,8 @@ public class MainActivity extends AppCompatActivity {
                 listView.post(new Runnable() {
                     @Override
                     public void run() {
-                        ArrayAdapter<RssItem> adapter = new ArrayAdapter<>(
+                        RssItemAdapter adapter = new RssItemAdapter(
                                 getApplicationContext(),
-                                android.R.layout.simple_list_item_1,
-                                android.R.id.text1,
                                 news);
                         listView.setAdapter(adapter);
                     }
